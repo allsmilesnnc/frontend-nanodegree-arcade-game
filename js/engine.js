@@ -29,6 +29,7 @@ var Engine = (function(global) {
     canvas.height = 606;
     doc.body.appendChild(canvas);
 
+
     /* This function serves as the kickoff point for the game loop itself
      * and handles properly calling the update and render methods.
      */
@@ -57,7 +58,7 @@ var Engine = (function(global) {
          * function again as soon as the browser is able to draw another frame.
          */
         win.requestAnimationFrame(main);
-    };
+    }
 
     /* This function does some initial setup that should only occur once,
      * particularly setting the lastTime variable that is required for the
@@ -80,21 +81,39 @@ var Engine = (function(global) {
      */
     function update(dt) {
         updateEntities(dt);
-        // checkCollisions();
+        checkCollisions();
+    }
+
+    // Collision detection between player and enemies
+    function checkCollisions() {
+        if (player.y === -1 ){
+            player.home();
+        }
+        for (var i = 0; i < allEnemies.length; i++) {
+            if (allEnemies[i].y === player.y && allEnemies[i].x > player.x - 1 && allEnemies[i].x < player.x + 1) {
+                player.home();
+            }
+        }
     }
 
     /* This is called by the update function  and loops through all of the
      * objects within your allEnemies array as defined in app.js and calls
      * their update() methods. It will then call the update function for your
      * player object. These update methods should focus purely on updating
-     * the data/properties related to  the object. Do your drawing in your
+     * the data/properties related to the object. Do your drawing in your
      * render methods.
      */
     function updateEntities(dt) {
         allEnemies.forEach(function(enemy) {
             enemy.update(dt);
         });
-        player.update();
+    }
+
+    //Sync the canvas to clear out any unwanted graphic effects of the player
+    function sync() {
+       ctx.rect(0,0,canvas.width,canvas.height);
+       ctx.fillStyle="#ffffff";
+       ctx.fill();
     }
 
     /* This function initially draws the "game level", it will then call
@@ -103,6 +122,7 @@ var Engine = (function(global) {
      * they are flipbooks creating the illusion of animation but in reality
      * they are just drawing the entire screen over and over.
      */
+
     function render() {
         /* This array holds the relative URL to the image used
          * for that particular row of the game level.
@@ -123,6 +143,8 @@ var Engine = (function(global) {
          * and, using the rowImages array, draw the correct image for that
          * portion of the "grid"
          */
+    
+        sync();
         for (row = 0; row < numRows; row++) {
             for (col = 0; col < numCols; col++) {
                 /* The drawImage function of the canvas' context element
@@ -135,7 +157,6 @@ var Engine = (function(global) {
                 ctx.drawImage(Resources.get(rowImages[row]), col * 101, row * 83);
             }
         }
-
 
         renderEntities();
     }
@@ -173,6 +194,7 @@ var Engine = (function(global) {
         'images/grass-block.png',
         'images/enemy-bug.png',
         'images/char-boy.png'
+                
     ]);
     Resources.onReady(init);
 
